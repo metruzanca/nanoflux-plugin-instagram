@@ -119,3 +119,14 @@ func TestSummaryHTMLEscapesCaption(t *testing.T) {
 }
 
 func hasPrefix(s, p string) bool { return len(s) >= len(p) && s[:len(p)] == p }
+
+func TestIconCapability(t *testing.T) {
+	u, _ := url.Parse("https://www.instagram.com/someone")
+	if !(Plugin{}).Match(u, pluginapi.CapIcon) {
+		t.Fatal("Instagram host should match CapIcon")
+	}
+	mime, data := (Plugin{}).Icon(u.String())
+	if mime != "image/svg+xml" || len(data) == 0 {
+		t.Fatalf("icon = %q, %d bytes", mime, len(data))
+	}
+}

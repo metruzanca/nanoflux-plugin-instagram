@@ -1,4 +1,4 @@
-// Package instagram is the native plugin for Instagram profile feeds.
+// Package instagram is the plugin for Instagram profile feeds.
 // Instagram has no public feed; the profile page serves its recent-post grid
 // only to crawler user-agents, embedded in the web client's Relay payload.
 // Treat it as best-effort.
@@ -65,7 +65,17 @@ var (
 // Plugin is the Instagram Fetcher.
 type Plugin struct{}
 
-var _ pluginapi.Fetcher = Plugin{}
+var (
+	_ pluginapi.Fetcher      = Plugin{}
+	_ pluginapi.IconProvider = Plugin{}
+)
+
+// Icon returns the built-in Instagram icon for an Instagram host.
+func (Plugin) Icon(string) (string, []byte) {
+	return "image/svg+xml", []byte(instagramIcon)
+}
+
+const instagramIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#9aa3b2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`
 
 func (Plugin) Meta() pluginapi.Meta {
 	return pluginapi.Meta{
@@ -85,6 +95,8 @@ func (Plugin) Match(u *url.URL, cap pluginapi.Capability) bool {
 	switch cap {
 	case pluginapi.CapDiscover, pluginapi.CapFetch:
 		return isProfileURL(u)
+	case pluginapi.CapIcon:
+		return u != nil && isHost(u.Hostname())
 	default:
 		return false
 	}
